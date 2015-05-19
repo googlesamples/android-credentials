@@ -19,8 +19,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,6 +31,7 @@ import com.google.android.gms.auth.api.credentials.Credential;
 import com.google.android.gms.auth.api.credentials.CredentialRequest;
 import com.google.android.gms.auth.api.credentials.CredentialRequestResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -44,25 +47,30 @@ public class MainActivity extends ActionBarActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int RC_SAVE = 1;
-    private static final int RC_READ = 2;
+    private static final int RC_HINT = 2;
+    private static final int RC_READ = 3;
 
     private EditText mEmailField;
     private EditText mPasswordField;
 
     private GoogleApiClient mCredentialsApiClient;
+    private Credential mCurrentCredential;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
         // Fields
         mEmailField = (EditText) findViewById(R.id.edit_text_email);
         mPasswordField = (EditText) findViewById(R.id.edit_text_password);
 
         // Buttons
-        findViewById(R.id.button_sign_in).setOnClickListener(this);
+        findViewById(R.id.button_save_credential).setOnClickListener(this);
         findViewById(R.id.button_load_credentials).setOnClickListener(this);
+        findViewById(R.id.button_delete_loaded_credential).setOnClickListener(this);
 
         // Instantiate GoogleApiClient.  This is a very simple GoogleApiClient that only connects
         // to the Auth.CREDENTIALS_API, which does not require the user to go through the sign-in
@@ -92,23 +100,30 @@ public class MainActivity extends ActionBarActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
+        hideProgress();
 
-        if (requestCode == RC_READ) {
-            if (resultCode == RESULT_OK) {
-                Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
-                processRetrievedCredential(credential);
-            } else {
-                Log.e(TAG, "Credential Read: NOT OK");
-                showToast("Credential Read Failed");
-            }
-        } else if (requestCode == RC_SAVE) {
-            if (resultCode == RESULT_OK) {
-                Log.d(TAG, "Credential Save: OK");
-                showToast("Credential Save Success");
-            } else {
-                Log.e(TAG, "Credential Save: NOT OK");
-                showToast("Credential Save Failed");
-            }
+        switch (requestCode) {
+            case RC_HINT:
+                // Drop into handling for RC_READ
+            case RC_READ:
+                if (resultCode == RESULT_OK) {
+                    boolean isHint = (requestCode == RC_HINT);
+                    Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
+                    processRetrievedCredential(credential, isHint);
+                } else {
+                    Log.e(TAG, "Credential Read: NOT OK");
+                    showToast("Credential Read Failed");
+                }
+                break;
+            case RC_SAVE:
+                if (resultCode == RESULT_OK) {
+                    Log.d(TAG, "Credential Save: OK");
+                    showToast("Credential Save Success");
+                } else {
+                    Log.e(TAG, "Credential Save: NOT OK");
+                    showToast("Credential Save Failed");
+                }
+                break;
         }
     }
 
@@ -131,19 +146,22 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     /**
-     * Called when the Sign In button is clicked.  Reads the entries in the email and password
+     * Called when the save button is clicked.  Reads the entries in the email and password
      * fields and attempts to save a new Credential to the Credentials API.
      */
-    private void signInClicked() {
+    private void saveCredentialClicked() {
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
 
         // Create a Credential with the user's email as the ID and storing the password.  We
         // could also add 'Name' and 'ProfilePictureURL' but that is outside the scope of this
         // minimal sample.
-        Credential credential = new Credential.Builder(email)
+        Log.d(TAG, "Saving Credential:" + email + ":" + anonymizePassword(password));
+        final Credential credential = new Credential.Builder(email)
                 .setPassword(password)
                 .build();
+
+        showProgress();
 
         // NOTE: this method unconditionally saves the Credential built, even if all the fields
         // are blank or it is invalid in some other way.  In a real application you should contact
@@ -156,6 +174,7 @@ public class MainActivity extends ActionBarActivity implements
                         if (status.isSuccess()) {
                             Log.d(TAG, "SAVE: OK");
                             showToast("Credential Saved");
+                            hideProgress();
                         } else {
                             resolveResult(status, RC_SAVE);
                         }
@@ -179,6 +198,8 @@ public class MainActivity extends ActionBarActivity implements
                 .setSupportsPasswordLogin(true)
                 .build();
 
+        showProgress();
+
         Auth.CredentialsApi.request(mCredentialsApiClient, request).setResultCallback(
                 new ResultCallback<CredentialRequestResult>() {
                     @Override
@@ -187,11 +208,56 @@ public class MainActivity extends ActionBarActivity implements
                             // Successfully read the credential without any user interaction, this
                             // means there was only a single credential and the user has auto
                             // sign-in enabled.
-                            processRetrievedCredential(credentialRequestResult.getCredential());
+                            processRetrievedCredential(credentialRequestResult.getCredential(), false);
+                            hideProgress();
                         } else {
                             // Reading the credential requires a resolution, which means the user
                             // may be asked to pick among multiple credentials if they exist.
-                            resolveResult(credentialRequestResult.getStatus(), RC_READ);
+                            Status status = credentialRequestResult.getStatus();
+                            if (status.getStatusCode() == CommonStatusCodes.SIGN_IN_REQUIRED) {
+                                // This is a "hint" credential, which will have an ID but not
+                                // a password.  This can be used to populate the username/email
+                                // field of a sign-up form or to initialize other services.
+                                resolveResult(status, RC_HINT);
+                            } else {
+                                // This is most likely the case where the user has multiple saved
+                                // credentials and needs to pick one
+                                resolveResult(status, RC_READ);
+                            }
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Called when the delete credentials button is clicked.  This deletes the last Credential
+     * that was loaded using the load button.
+     */
+    private void deleteLoadedCredentialClicked() {
+        if (mCurrentCredential == null) {
+            showToast("Error: no credential to delete");
+            return;
+        }
+
+        showProgress();
+
+        Auth.CredentialsApi.delete(mCredentialsApiClient, mCurrentCredential).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        hideProgress();
+                        if (status.isSuccess()) {
+                            // Credential delete succeeded, disable the delete button because we
+                            // cannot delete the same credential twice.
+                            showToast("Credential Delete Success");
+                            findViewById(R.id.button_delete_loaded_credential).setEnabled(false);
+                            mCurrentCredential = null;
+                        } else {
+                            // Credential deletion either failed or was cancelled, this operation
+                            // never gives a 'resolution' so we can display the failure message
+                            // immediately.
+                            Log.e(TAG, "Credential Delete: NOT OK");
+                            showToast("Credential Delete Failed");
                         }
                     }
                 });
@@ -211,37 +277,77 @@ public class MainActivity extends ActionBarActivity implements
                 status.startResolutionForResult(MainActivity.this, requestCode);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "STATUS: Failed to send resolution.", e);
+                hideProgress();
             }
         } else {
             Log.e(TAG, "STATUS: FAIL");
             showToast("Could Not Resolve Error");
+            hideProgress();
         }
     }
 
     /**
      * Process a Credential object retrieved from a successful request.
      * @param credential the Credential to process.
+     * @param isHint true if the Credential is hint-only, false otherwise.
      */
-    private void processRetrievedCredential(Credential credential) {
-        Log.d(TAG, "Credential Retrieved: " + credential.getId());
-        showToast("Credential Retrieved");
+    private void processRetrievedCredential(Credential credential, boolean isHint) {
+        Log.d(TAG, "Credential Retrieved: " + credential.getId() + ":" +
+                anonymizePassword(credential.getPassword()));
+
+        // If the Credential is not a hint, we should store it an enable the delete button.
+        // If it is a hint, skip this because a hint cannot be deleted.
+        if (!isHint) {
+            showToast("Credential Retrieved");
+            mCurrentCredential = credential;
+            findViewById(R.id.button_delete_loaded_credential).setEnabled(true);
+        } else {
+            showToast("Credential Hint Retrieved");
+        }
 
         mEmailField.setText(credential.getId());
         mPasswordField.setText(credential.getPassword());
+    }
+
+    /**
+     * Converts a password to a series of asterisks the same length as the password, for better
+     * and safer logging.
+     */
+    private String anonymizePassword(String password) {
+        if (password == null) {
+            return "null";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < password.length(); i++) {
+            sb.append('*');
+        }
+        return sb.toString();
     }
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
+    private void showProgress() {
+        findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button_sign_in:
-                signInClicked();
+            case R.id.button_save_credential:
+                saveCredentialClicked();
                 break;
             case R.id.button_load_credentials:
                 loadCredentialsClicked();
+                break;
+            case R.id.button_delete_loaded_credential:
+                deleteLoadedCredentialClicked();
                 break;
         }
     }
