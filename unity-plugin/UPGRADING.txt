@@ -1,0 +1,5 @@
+NOTES ON UPGRADING
+
+If you have already integrated the plugin and want to upgrade it to a newer version,
+you must delete the Assets/GoogleSmartLock folder, then import the new package.
+
