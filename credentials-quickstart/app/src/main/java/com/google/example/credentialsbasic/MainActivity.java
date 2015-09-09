@@ -18,7 +18,7 @@ package com.google.example.credentialsbasic;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -37,9 +37,10 @@ import com.google.android.gms.common.api.Status;
 
 /**
  * A minimal example of saving and loading username/password credentials from the Credentials API.
+ *
  * @author samstern@google.com
  */
-public class MainActivity extends ActionBarActivity implements
+public class MainActivity extends AppCompatActivity implements
         View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -56,17 +57,24 @@ public class MainActivity extends ActionBarActivity implements
     private GoogleApiClient mCredentialsApiClient;
     private Credential mCurrentCredential;
     private boolean mIsResolving = false;
+    private EditText mName;
+
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
 
         // Fields
         mEmailField = (EditText) findViewById(R.id.edit_text_email);
         mPasswordField = (EditText) findViewById(R.id.edit_text_password);
+        mName = (EditText) findViewById(R.id.edit_text_name);
+
 
         // Buttons
         findViewById(R.id.button_save_credential).setOnClickListener(this);
@@ -124,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements
                     Log.e(TAG, "Credential Read: NOT OK");
                     showToast("Credential Read Failed");
                 }
-                
+
                 mIsResolving = false;
                 break;
             case RC_SAVE:
@@ -166,12 +174,15 @@ public class MainActivity extends ActionBarActivity implements
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
 
+        String name = mName.getText().toString();
+
         // Create a Credential with the user's email as the ID and storing the password.  We
         // could also add 'Name' and 'ProfilePictureURL' but that is outside the scope of this
         // minimal sample.
         Log.d(TAG, "Saving Credential:" + email + ":" + anonymizePassword(password));
         final Credential credential = new Credential.Builder(email)
                 .setPassword(password)
+                .setName(name)
                 .build();
 
         showProgress();
@@ -199,7 +210,7 @@ public class MainActivity extends ActionBarActivity implements
      * Called when the Load Credentials button is clicked. Attempts to read the user's saved
      * Credentials from the Credentials API.  This may show UX, such as a credential picker
      * or an account picker.
-     *
+     * <p/>
      * <b>Note:</b> in a normal application loading credentials should happen without explicit user
      * action, this is only connected to a 'Load Credentials' button for easier demonstration
      * in this sample.  Make sure not to load credentials automatically if the user has clicked
@@ -212,6 +223,7 @@ public class MainActivity extends ActionBarActivity implements
 
     /**
      * Request Credentials from the Credentials API.
+     *
      * @param shouldResolveHint true if resolutions for hints should occur. Setting
      *                          shouldResolveHint to false will not show UI unless there is a known
      *                          Credential and is therefore appropriate for app start.
@@ -255,7 +267,7 @@ public class MainActivity extends ActionBarActivity implements
                                 // credentials and needs to pick one
                                 resolveResult(status, RC_READ);
                             } else {
-                              Log.w(TAG, "Unexpected status code: " + status.getStatusCode());
+                                Log.w(TAG, "Unexpected status code: " + status.getStatusCode());
                             }
                         }
                     }
@@ -285,6 +297,8 @@ public class MainActivity extends ActionBarActivity implements
                             showToast("Credential Delete Success");
                             ((EditText) findViewById(R.id.edit_text_email)).setText("");
                             ((EditText) findViewById(R.id.edit_text_password)).setText("");
+                            ((EditText) findViewById(R.id.edit_text_name)).setText("");
+
                             mCurrentCredential = null;
                         } else {
                             // Credential deletion either failed or was cancelled, this operation
@@ -299,7 +313,8 @@ public class MainActivity extends ActionBarActivity implements
 
     /**
      * Attempt to resolve a non-successful Status from an asynchronous request.
-     * @param status the Status to resolve.
+     *
+     * @param status      the Status to resolve.
      * @param requestCode the request code to use when starting an Activity for result,
      *                    this will be passed back to onActivityResult.
      */
@@ -310,7 +325,7 @@ public class MainActivity extends ActionBarActivity implements
             Log.w(TAG, "resolveResult: already resolving.");
             return;
         }
-        
+
         Log.d(TAG, "Resolving: " + status);
         if (status.hasResolution()) {
             Log.d(TAG, "STATUS: RESOLVING");
@@ -330,8 +345,9 @@ public class MainActivity extends ActionBarActivity implements
 
     /**
      * Process a Credential object retrieved from a successful request.
+     *
      * @param credential the Credential to process.
-     * @param isHint true if the Credential is hint-only, false otherwise.
+     * @param isHint     true if the Credential is hint-only, false otherwise.
      */
     private void processRetrievedCredential(Credential credential, boolean isHint) {
         Log.d(TAG, "Credential Retrieved: " + credential.getId() + ":" +
@@ -349,6 +365,7 @@ public class MainActivity extends ActionBarActivity implements
 
         mEmailField.setText(credential.getId());
         mPasswordField.setText(credential.getPassword());
+        mName.setText(credential.getName());
     }
 
     /**

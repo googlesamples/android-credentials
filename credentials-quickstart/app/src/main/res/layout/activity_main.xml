@@ -20,33 +20,28 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <android.support.v7.widget.Toolbar
+    <include
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        layout="@layout/toolbar">
+    </include>
+
+    <EditText
+        android:id="@+id/edit_text_name"
+        android:layout_width="@dimen/width_field"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:indeterminate="true"
-            android:indeterminateOnly="true"
-            android:visibility="invisible"
-            tools:visibility="visible" />
-
-    </android.support.v7.widget.Toolbar>
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:hint="@string/hint_name"
+        android:inputType="textCapWords" />
 
     <EditText
         android:id="@+id/edit_text_email"
         android:layout_width="@dimen/width_field"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/toolbar"
+        android:layout_below="@+id/edit_text_name"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:hint="@string/hint_email"

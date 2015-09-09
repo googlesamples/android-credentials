@@ -14,14 +14,11 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">CredentialsBasic</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">Uso básico de credenciales </string>
     <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
-    <string name="action_save_credential">Save Credential</string>
-    <string name="load_credentials">Load Credentials</string>
-    <string name="delete_credential">Delete Loaded Credential</string>
-    <string name="hint_name">Name</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="action_save_credential">Guardar Credenciales</string>
+    <string name="load_credentials">Cargar Credenciales</string>
+    <string name="delete_credential">Eliminar Credenciales Cargadas</string>
+    <string name="hint_name">Nombre</string>
 </resources>
