@@ -14,11 +14,11 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">Uso básico de credenciales </string>
-    <string name="hint_email">Email</string>
+    <string name="app_name">Uso básico de credenciales</string>
+    <string name="hint_name">Nombre</string>
+    <string name="hint_email">Correo Electrónico</string>
     <string name="hint_password">Contraseña</string>
     <string name="action_save_credential">Guardar Credenciales</string>
     <string name="load_credentials">Cargar Credenciales</string>
     <string name="delete_credential">Eliminar Credenciales Cargadas</string>
-    <string name="hint_name">Nombre</string>
 </resources>
