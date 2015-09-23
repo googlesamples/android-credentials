@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.example.credentialsbasic;
+package app.fjlopezs.credentialsbasic;
 
 import android.content.Intent;
 import android.content.IntentSender;
@@ -34,6 +34,8 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+
+import app.fjlopezs.credentialsbasic.helpers.Preferences;
 
 /**
  * A minimal example of saving and loading username/password credentials from the Credentials API.
@@ -58,17 +60,18 @@ public class MainActivity extends AppCompatActivity implements
     private Credential mCurrentCredential;
     private boolean mIsResolving = false;
     private EditText mName;
+    private Preferences pref;
+    private String email;
+    private String name;
 
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
+        pref = new Preferences(MainActivity.this);
 
         // Fields
         mEmailField = (EditText) findViewById(R.id.edit_text_email);
@@ -173,8 +176,11 @@ public class MainActivity extends AppCompatActivity implements
     private void saveCredentialClicked() {
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
-
         String name = mName.getText().toString();
+
+        pref.savePreferences(Constants.EMAIL, email);
+        pref.savePreferences(Constants.NAME, name);
+
 
         // Create a Credential with the user's email as the ID and storing the password.  We
         // could also add 'Name' and 'ProfilePictureURL' but that is outside the scope of this
@@ -279,10 +285,10 @@ public class MainActivity extends AppCompatActivity implements
      * that was loaded using the load button.
      */
     private void deleteLoadedCredentialClicked() {
-        if (mCurrentCredential == null) {
+        /*if (mCurrentCredential == null) {
             showToast("Error: no credential to delete");
             return;
-        }
+        }*/
 
         showProgress();
 
@@ -337,6 +343,15 @@ public class MainActivity extends AppCompatActivity implements
                 hideProgress();
             }
         } else {
+
+            if (pref.exist(Constants.EMAIL)){
+                email = pref.getPreferences(Constants.EMAIL);
+                name = pref.getPreferences(Constants.NAME);
+                startActivity();
+            }
+
+
+
             Log.e(TAG, "STATUS: FAIL");
             showToast("Could Not Resolve Error");
             hideProgress();
@@ -416,6 +431,19 @@ public class MainActivity extends AppCompatActivity implements
                 deleteLoadedCredentialClicked();
                 break;
         }
+    }
+
+
+    private void startActivity(){
+        Intent intentActivity = new Intent(MainActivity.this, SuccessActivity.class);
+        Bundle options = new Bundle();
+        options.putString(Constants.NAME, name);
+        options.putString(Constants.EMAIL, email);
+
+        intentActivity.putExtras(options);
+        startActivity(intentActivity);
+        //finish();
+
     }
 
 
