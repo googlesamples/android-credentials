@@ -42,12 +42,12 @@ import app.fjlopezs.credentialsbasic.helpers.Preferences;
  *
  * @author samstern@google.com
  */
-public class MainActivity extends AppCompatActivity implements
+public class LoginActivity extends AppCompatActivity implements
         View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = LoginActivity.class.getSimpleName();
     private static final String KEY_IS_RESOLVING = "is_resolving";
     private static final int RC_SAVE = 1;
     private static final int RC_HINT = 2;
@@ -68,10 +68,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        pref = new Preferences(MainActivity.this);
+        pref = new Preferences(LoginActivity.this);
 
         // Fields
         mEmailField = (EditText) findViewById(R.id.edit_text_email);
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements
         if (status.hasResolution()) {
             Log.d(TAG, "STATUS: RESOLVING");
             try {
-                status.startResolutionForResult(MainActivity.this, requestCode);
+                status.startResolutionForResult(LoginActivity.this, requestCode);
                 mIsResolving = true;
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "STATUS: Failed to send resolution.", e);
@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private void startActivity(){
-        Intent intentActivity = new Intent(MainActivity.this, SuccessActivity.class);
+        Intent intentActivity = new Intent(LoginActivity.this, SuccessActivity.class);
         Bundle options = new Bundle();
         options.putString(Constants.NAME, name);
         options.putString(Constants.EMAIL, email);
