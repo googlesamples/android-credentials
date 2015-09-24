@@ -1,4 +1,4 @@
-package app.fjlopezs.credentialsbasic.helpers;
+package app.fjlopezs.credentials.helpers;
 
 import android.content.Context;
 import android.content.ContextWrapper;

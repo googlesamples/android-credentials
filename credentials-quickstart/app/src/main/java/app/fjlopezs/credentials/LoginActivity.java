@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package app.fjlopezs.credentialsbasic;
+package app.fjlopezs.credentials;
 
 import android.content.Intent;
 import android.content.IntentSender;
@@ -22,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -35,7 +34,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-import app.fjlopezs.credentialsbasic.helpers.Preferences;
+import app.fjlopezs.credentials.helpers.Preferences;
 
 /**
  * A minimal example of saving and loading username/password credentials from the Credentials API.
@@ -53,13 +52,12 @@ public class LoginActivity extends AppCompatActivity implements
     private static final int RC_HINT = 2;
     private static final int RC_READ = 3;
 
-    private EditText mEmailField;
-    private EditText mPasswordField;
+
 
     private GoogleApiClient mCredentialsApiClient;
     private Credential mCurrentCredential;
     private boolean mIsResolving = false;
-    private EditText mName;
+
     private Preferences pref;
     private String email;
     private String name;
@@ -72,17 +70,12 @@ public class LoginActivity extends AppCompatActivity implements
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         pref = new Preferences(LoginActivity.this);
-
-        // Fields
-        mEmailField = (EditText) findViewById(R.id.edit_text_email);
-        mPasswordField = (EditText) findViewById(R.id.edit_text_password);
-        mName = (EditText) findViewById(R.id.edit_text_name);
+        pref.setSharedPreferences("credentials");
 
 
         // Buttons
-        findViewById(R.id.button_save_credential).setOnClickListener(this);
-        findViewById(R.id.button_load_credentials).setOnClickListener(this);
-        findViewById(R.id.button_delete_loaded_credential).setOnClickListener(this);
+        findViewById(R.id.buttonGoogleSign).setOnClickListener(this);
+
 
         // Instance state
         if (savedInstanceState != null) {
@@ -142,6 +135,7 @@ public class LoginActivity extends AppCompatActivity implements
                 if (resultCode == RESULT_OK) {
                     Log.d(TAG, "Credential Save: OK");
                     showToast("Credential Save Success");
+                    startActivity();
                 } else {
                     Log.e(TAG, "Credential Save: NOT OK");
                     showToast("Credential Save Failed");
@@ -155,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "onConnected");
-        findViewById(R.id.button_load_credentials).setEnabled(true);
+        findViewById(R.id.buttonGoogleSign).setEnabled(true);
     }
 
     @Override
@@ -166,7 +160,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        findViewById(R.id.button_load_credentials).setEnabled(false);
+        findViewById(R.id.buttonGoogleSign).setEnabled(false);
     }
 
     /**
@@ -174,20 +168,22 @@ public class LoginActivity extends AppCompatActivity implements
      * fields and attempts to save a new Credential to the Credentials API.
      */
     private void saveCredentialClicked() {
-        String email = mEmailField.getText().toString();
-        String password = mPasswordField.getText().toString();
-        String name = mName.getText().toString();
 
-        pref.savePreferences(Constants.EMAIL, email);
-        pref.savePreferences(Constants.NAME, name);
+
+        if (email != null){
+            pref.savePreferences(Constants.EMAIL, email);
+            pref.savePreferences(Constants.NAME, name);
+        }
+
+
 
 
         // Create a Credential with the user's email as the ID and storing the password.  We
         // could also add 'Name' and 'ProfilePictureURL' but that is outside the scope of this
         // minimal sample.
-        Log.d(TAG, "Saving Credential:" + email + ":" + anonymizePassword(password));
+        Log.d(TAG, "Saving Credential:" + email + ":" + name);
         final Credential credential = new Credential.Builder(email)
-                .setPassword(password)
+                .setPassword("password")
                 .setName(name)
                 .build();
 
@@ -273,6 +269,19 @@ public class LoginActivity extends AppCompatActivity implements
                                 // credentials and needs to pick one
                                 resolveResult(status, RC_READ);
                             } else {
+                                if (status.getStatusCode() == CommonStatusCodes.NETWORK_ERROR) {
+
+
+                                    if (pref.exist(Constants.EMAIL)) {
+                                        email = pref.getPreferences(Constants.EMAIL);
+                                        name = pref.getPreferences(Constants.NAME);
+                                        startActivity();//OK
+                                    } else {
+                                        showToast("Ninguna conexión a Internet está disponible actualmente");
+                                    }
+
+
+                                }
                                 Log.w(TAG, "Unexpected status code: " + status.getStatusCode());
                             }
                         }
@@ -285,10 +294,10 @@ public class LoginActivity extends AppCompatActivity implements
      * that was loaded using the load button.
      */
     private void deleteLoadedCredentialClicked() {
-        /*if (mCurrentCredential == null) {
+        if (mCurrentCredential == null) {
             showToast("Error: no credential to delete");
             return;
-        }*/
+        }
 
         showProgress();
 
@@ -301,9 +310,9 @@ public class LoginActivity extends AppCompatActivity implements
                             // Credential delete succeeded, disable the delete button because we
                             // cannot delete the same credential twice. Clear text fields.
                             showToast("Credential Delete Success");
-                            ((EditText) findViewById(R.id.edit_text_email)).setText("");
-                            ((EditText) findViewById(R.id.edit_text_password)).setText("");
-                            ((EditText) findViewById(R.id.edit_text_name)).setText("");
+                            pref.clearAll();
+                            name = null;
+                            email = null;
 
                             mCurrentCredential = null;
                         } else {
@@ -347,7 +356,7 @@ public class LoginActivity extends AppCompatActivity implements
             if (pref.exist(Constants.EMAIL)){
                 email = pref.getPreferences(Constants.EMAIL);
                 name = pref.getPreferences(Constants.NAME);
-                startActivity();
+                startActivity();//??
             }
 
 
@@ -365,39 +374,29 @@ public class LoginActivity extends AppCompatActivity implements
      * @param isHint     true if the Credential is hint-only, false otherwise.
      */
     private void processRetrievedCredential(Credential credential, boolean isHint) {
-        Log.d(TAG, "Credential Retrieved: " + credential.getId() + ":" +
-                anonymizePassword(credential.getPassword()));
+        Log.d(TAG, "Credential Retrieved: " + credential.getId() + ":" + credential.getName());
+
+        email = credential.getId();
+        name = credential.getName();
 
         // If the Credential is not a hint, we should store it an enable the delete button.
         // If it is a hint, skip this because a hint cannot be deleted.
         if (!isHint) {
             showToast("Credential Retrieved");
             mCurrentCredential = credential;
-            findViewById(R.id.button_delete_loaded_credential).setEnabled(true);
+            startActivity();//OK
+
         } else {
             showToast("Credential Hint Retrieved");
+            saveCredentialClicked();
+
         }
 
-        mEmailField.setText(credential.getId());
-        mPasswordField.setText(credential.getPassword());
-        mName.setText(credential.getName());
+//        deleteLoadedCredentialClicked();
+
     }
 
-    /**
-     * Converts a password to a series of asterisks the same length as the password, for better
-     * and safer logging.
-     */
-    private String anonymizePassword(String password) {
-        if (password == null) {
-            return "null";
-        }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < password.length(); i++) {
-            sb.append('*');
-        }
-        return sb.toString();
-    }
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
@@ -406,30 +405,28 @@ public class LoginActivity extends AppCompatActivity implements
     private void showProgress() {
         findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
 
-        findViewById(R.id.button_load_credentials).setEnabled(false);
-        findViewById(R.id.button_save_credential).setEnabled(false);
-        findViewById(R.id.button_delete_loaded_credential).setEnabled(false);
+        findViewById(R.id.buttonGoogleSign).setEnabled(false);
+
     }
 
     private void hideProgress() {
         findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
 
-        findViewById(R.id.button_load_credentials).setEnabled(true);
-        findViewById(R.id.button_save_credential).setEnabled(true);
+        findViewById(R.id.buttonGoogleSign).setEnabled(true);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button_save_credential:
+            /*case R.id.button_save_credential:
                 saveCredentialClicked();
-                break;
-            case R.id.button_load_credentials:
+                break;*/
+            case R.id.buttonGoogleSign:
                 loadCredentialsClicked();
                 break;
-            case R.id.button_delete_loaded_credential:
+            /*case R.id.button_delete_loaded_credential:
                 deleteLoadedCredentialClicked();
-                break;
+                break;*/
         }
     }
 

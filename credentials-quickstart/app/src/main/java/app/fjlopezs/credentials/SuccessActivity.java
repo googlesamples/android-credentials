@@ -1,4 +1,4 @@
-package app.fjlopezs.credentialsbasic;
+package app.fjlopezs.credentials;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

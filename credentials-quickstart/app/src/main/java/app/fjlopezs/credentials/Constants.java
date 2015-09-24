@@ -1,4 +1,4 @@
-package app.fjlopezs.credentialsbasic;
+package app.fjlopezs.credentials;
 
 /**
  * Created by Francisco on 22-09-2015.

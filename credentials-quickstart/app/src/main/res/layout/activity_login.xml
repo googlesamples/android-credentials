@@ -24,64 +24,13 @@
         layout="@layout/toolbar">
     </include>
 
-    <EditText
-        android:id="@+id/edit_text_name"
-        android:layout_width="@dimen/width_field"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/toolbar"
-        android:layout_marginTop="20dp"
-        android:gravity="center_horizontal"
-        android:hint="@string/hint_name"
-        android:inputType="textCapWords" />
-
-    <EditText
-        android:id="@+id/edit_text_email"
-        android:layout_width="@dimen/width_field"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/edit_text_name"
-        android:layout_marginTop="20dp"
-        android:gravity="center_horizontal"
-        android:hint="@string/hint_email"
-        android:inputType="textEmailAddress" />
-
-    <EditText
-        android:id="@+id/edit_text_password"
-        android:layout_width="@dimen/width_field"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_text_email"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal"
-        android:hint="@string/hint_password"
-        android:inputType="textPassword" />
-
     <Button
-        android:id="@+id/button_save_credential"
         android:layout_width="@dimen/width_field"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_text_password"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:text="@string/action_save_credential" />
-
-    <Button
-        android:id="@+id/button_load_credentials"
-        android:layout_width="@dimen/width_field"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/button_save_credential"
-        android:layout_centerHorizontal="true"
-        android:enabled="false"
-        android:text="@string/load_credentials" />
-
-    <Button
-        android:id="@+id/button_delete_loaded_credential"
-        android:layout_width="@dimen/width_field"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button_load_credentials"
-        android:layout_centerHorizontal="true"
-        android:enabled="false"
-        android:text="@string/delete_credential" />
+        android:text="Iniciar Sesión"
+        android:id="@+id/buttonGoogleSign"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

@@ -15,7 +15,7 @@
  limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.fjlopezs.credentialsbasic" >
+    package="app.fjlopezs.credentials" >
 
     <application
         android:allowBackup="true"
@@ -33,7 +33,8 @@
         </activity>
         <activity
             android:name=".SuccessActivity"
-            android:label="@string/title_activity_success" >
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_success">
         </activity>
     </application>
 
