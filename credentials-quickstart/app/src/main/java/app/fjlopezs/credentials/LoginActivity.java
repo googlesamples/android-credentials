@@ -100,7 +100,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         // Attempt auto-sign in.
         if (!mIsResolving) {
-            requestCredentials(false);
+            requestCredentials(true);
         }
     }
 
@@ -278,6 +278,7 @@ public class LoginActivity extends AppCompatActivity implements
                                         startActivity();//OK
                                     } else {
                                         showToast("Ninguna conexión a Internet está disponible actualmente");
+                                        findViewById(R.id.buttonGoogleSign).setVisibility(View.VISIBLE);
                                     }
 
 
@@ -382,6 +383,7 @@ public class LoginActivity extends AppCompatActivity implements
         // If the Credential is not a hint, we should store it an enable the delete button.
         // If it is a hint, skip this because a hint cannot be deleted.
         if (!isHint) {
+            findViewById(R.id.buttonGoogleSign).setVisibility(View.GONE);
             showToast("Credential Retrieved");
             mCurrentCredential = credential;
             startActivity();//OK

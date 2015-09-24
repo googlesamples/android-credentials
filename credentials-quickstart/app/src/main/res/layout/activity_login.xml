@@ -27,10 +27,11 @@
     <Button
         android:layout_width="@dimen/width_field"
         android:layout_height="wrap_content"
-        android:text="Iniciar Sesión"
+        android:text="Reintentar"
         android:id="@+id/buttonGoogleSign"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>
