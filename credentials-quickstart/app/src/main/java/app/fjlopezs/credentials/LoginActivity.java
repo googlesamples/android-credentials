@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -42,7 +43,6 @@ import app.fjlopezs.credentials.helpers.Preferences;
  * @author samstern@google.com
  */
 public class LoginActivity extends AppCompatActivity implements
-        View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -61,6 +61,7 @@ public class LoginActivity extends AppCompatActivity implements
     private Preferences pref;
     private String email;
     private String name;
+    private Button botonReintentar;
 
 
     @Override
@@ -74,7 +75,13 @@ public class LoginActivity extends AppCompatActivity implements
 
 
         // Buttons
-        findViewById(R.id.buttonGoogleSign).setOnClickListener(this);
+        botonReintentar = ( Button) findViewById(R.id.buttonGoogleSign);
+        botonReintentar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadCredentialsClicked();
+            }
+        });
 
 
         // Instance state
@@ -149,7 +156,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "onConnected");
-        findViewById(R.id.buttonGoogleSign).setEnabled(true);
+        botonReintentar.setEnabled(true);
     }
 
     @Override
@@ -160,7 +167,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        findViewById(R.id.buttonGoogleSign).setEnabled(false);
+        botonReintentar.setEnabled(false);
     }
 
     /**
@@ -278,7 +285,7 @@ public class LoginActivity extends AppCompatActivity implements
                                         startActivity();//OK
                                     } else {
                                         showToast("Ninguna conexión a Internet está disponible actualmente");
-                                        findViewById(R.id.buttonGoogleSign).setVisibility(View.VISIBLE);
+                                        botonReintentar.setVisibility(View.VISIBLE);
                                     }
 
 
@@ -383,7 +390,7 @@ public class LoginActivity extends AppCompatActivity implements
         // If the Credential is not a hint, we should store it an enable the delete button.
         // If it is a hint, skip this because a hint cannot be deleted.
         if (!isHint) {
-            findViewById(R.id.buttonGoogleSign).setVisibility(View.GONE);
+            botonReintentar.setVisibility(View.GONE);
             showToast("Credential Retrieved");
             mCurrentCredential = credential;
             startActivity();//OK
@@ -407,29 +414,14 @@ public class LoginActivity extends AppCompatActivity implements
     private void showProgress() {
         findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
 
-        findViewById(R.id.buttonGoogleSign).setEnabled(false);
+        botonReintentar.setEnabled(false);
 
     }
 
     private void hideProgress() {
         findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
 
-        findViewById(R.id.buttonGoogleSign).setEnabled(true);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            /*case R.id.button_save_credential:
-                saveCredentialClicked();
-                break;*/
-            case R.id.buttonGoogleSign:
-                loadCredentialsClicked();
-                break;
-            /*case R.id.button_delete_loaded_credential:
-                deleteLoadedCredentialClicked();
-                break;*/
-        }
+        botonReintentar.setEnabled(true);
     }
 
 
