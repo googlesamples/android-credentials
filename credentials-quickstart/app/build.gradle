@@ -23,8 +23,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.0.1'
 
-    // TODO(samstern): udpate before ship
-    compile 'com.google.android.gms:play-services-auth:8.2.96'
+    compile 'com.google.android.gms:play-services-auth:8.3.0'
 
     compile 'com.google.api-client:google-api-client:1.19.1'
 }
