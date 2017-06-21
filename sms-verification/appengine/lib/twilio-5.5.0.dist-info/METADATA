@@ -1,0 +1,43 @@
+Metadata-Version: 2.0
+Name: twilio
+Version: 5.5.0
+Summary: Twilio API client and TwiML generator
+Home-page: https://github.com/twilio/twilio-python/
+Author: Twilio
+Author-email: help@twilio.com
+License: UNKNOWN
+Keywords: twilio,twiml
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.5
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Communications :: Telephony
+Requires-Dist: httplib2 (>=0.7)
+Requires-Dist: pytz
+Requires-Dist: six
+Requires-Dist: pysocks; python_version=="3.2"
+Requires-Dist: pysocks; python_version=="3.3"
+Requires-Dist: pysocks; python_version=="3.4"
+Requires-Dist: pysocks; python_version=="3.5"
+
+Python Twilio Helper Library
+----------------------------
+
+DESCRIPTION
+The Twilio REST SDK simplifies the process of making calls using the Twilio REST API.
+The Twilio REST API lets to you initiate outgoing calls, list previous calls,
+and much more.  See https://www.github.com/twilio/twilio-python for more information.
+
+ LICENSE The Twilio Python Helper Library is distributed under the MIT
+License 
+
