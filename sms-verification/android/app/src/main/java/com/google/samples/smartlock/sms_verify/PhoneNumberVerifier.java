@@ -314,7 +314,6 @@ public class PhoneNumberVerifier extends Service {
 
             String action = intent.getAction();
             if (SmsRetriever.SMS_RETRIEVED_ACTION.equals(action)) {
-//                smsReceiver.cancelTimeout();
                 cancelTimeout();
                 notifyStatus(STATUS_RESPONSE_RECEIVED, null);
                 Bundle extras = intent.getExtras();
