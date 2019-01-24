@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# ------------------------------------------------------------------
-# [Author] Title
-#          Description
-# ------------------------------------------------------------------
-
 VERSION=0.1.0
 SUBJECT=sms-retriever-hash-generator
 USAGE="Usage: sms_retriever_hash.sh --package package_name --keystore keystore_file"
@@ -14,8 +9,6 @@ if [ $# == 0 ] ; then
     echo $USAGE
     exit 1;
 fi
-
-# USE: apkblacklister.sh --source source.apk --target target.apk more files to scan
 
 if [[ "$1" != "--package" ]]; then
   echo "Error: expected --package as first parameter"
